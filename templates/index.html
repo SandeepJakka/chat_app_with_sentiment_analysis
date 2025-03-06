@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Sentiment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message bot-message">
+                <p>Hi! How can I assist you today? 😊</p>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="user-message" placeholder="Type a message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            
+            $("#send-btn").click(function() {
+                var message = $("#user-message").val();
+                if (message.trim() === "") {
+                    alert("Please enter a message.");
+                    return;
+                }
+
+               
+                $("#user-message").val("");
+
+                
+                $("#chat-box").append('<div class="chat-message user-message"><p>' + message + '</p></div>');
+
+                
+                $.post("/analyze", { message: message }, function(data) {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        
+                        var sentimentClass = data.sentiment === "positive" ? "positive" :
+                                             data.sentiment === "negative" ? "negative" : "neutral";
+                        $("#chat-box").append('<div class="chat-message bot-message ' + sentimentClass + '"><p>' + data.response + '</p></div>');
+                    }
+                
+                    $("#chat-box").scrollTop($("#chat-box")[0].scrollHeight);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
